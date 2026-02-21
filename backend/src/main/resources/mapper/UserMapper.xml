@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hr.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.hr.model.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="role" property="role"/>
+        <result column="dept_id" property="deptId"/>
+        <result column="dept_scope" property="deptScope"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT * FROM sys_user
+        WHERE username = #{username} AND is_deleted = #{isDeleted}
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM sys_user WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (username, password, role, dept_id, dept_scope, is_deleted)
+        VALUES (#{username}, #{password}, #{role}, #{deptId}, #{deptScope}, 0)
+    </insert>
+
+    <update id="update">
+        UPDATE sys_user
+        <set>
+            <if test="password != null">password = #{password},</if>
+            <if test="role != null">role = #{role},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="deptScope != null">dept_scope = #{deptScope},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+</mapper>

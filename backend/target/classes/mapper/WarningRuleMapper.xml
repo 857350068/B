@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hr.mapper.WarningRuleMapper">
+
+    <resultMap id="BaseResultMap" type="com.hr.model.entity.WarningRule">
+        <id column="id" property="id"/>
+        <result column="rule_type" property="ruleType"/>
+        <result column="threshold" property="threshold"/>
+        <result column="description" property="description"/>
+        <result column="effective" property="effective"/>
+        <result column="update_log" property="updateLog"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectEffective" resultMap="BaseResultMap">
+        SELECT * FROM warning_rule WHERE effective = 1
+    </select>
+</mapper>
