@@ -1,0 +1,30 @@
+# Java/Maven 编译产物
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.logs
+
+# 前端依赖/编译产物
+node_modules/
+frontend/dist/
+frontend/build/
+*.npmrc
+package-lock.json  # 若团队统一管理依赖，可注释这行；否则建议忽略
+
+# IDE配置文件（根据你用的编辑器加）
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# 系统/临时文件
+.DS_Store
+*.tmp
+*.bak
+*.log
+
+# 脚本/批处理临时文件
+*.bat.bak

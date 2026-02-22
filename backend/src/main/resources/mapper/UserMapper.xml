@@ -6,9 +6,14 @@
         <id column="id" property="id"/>
         <result column="username" property="username"/>
         <result column="password" property="password"/>
+        <result column="name" property="name"/>
         <result column="role" property="role"/>
         <result column="dept_id" property="deptId"/>
+        <result column="dept_name" property="deptName"/>
         <result column="dept_scope" property="deptScope"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="status" property="status"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -23,19 +28,31 @@
         SELECT * FROM sys_user WHERE id = #{id} AND is_deleted = 0
     </select>
 
+    <select id="selectByUsernameExcludeId" resultMap="BaseResultMap">
+        SELECT * FROM sys_user 
+        WHERE username = #{username} AND id != #{excludeId} AND is_deleted = 0
+    </select>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sys_user (username, password, role, dept_id, dept_scope, is_deleted)
-        VALUES (#{username}, #{password}, #{role}, #{deptId}, #{deptScope}, 0)
+        INSERT INTO sys_user (username, password, name, role, dept_id, dept_name, dept_scope, phone, email, status, is_deleted, create_time, update_time)
+        VALUES (#{username}, #{password}, #{name}, #{role}, #{deptId}, #{deptName}, #{deptScope}, #{phone}, #{email}, #{status}, 0, NOW(), NOW())
     </insert>
 
     <update id="update">
         UPDATE sys_user
         <set>
+            <if test="username != null">username = #{username},</if>
             <if test="password != null">password = #{password},</if>
+            <if test="name != null">name = #{name},</if>
             <if test="role != null">role = #{role},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
             <if test="deptScope != null">dept_scope = #{deptScope},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="status != null">status = #{status},</if>
             <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            update_time = NOW(),
         </set>
         WHERE id = #{id}
     </update>

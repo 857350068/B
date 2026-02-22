@@ -23,8 +23,8 @@ spring:
   # Hive 配置（用于分析数据）
   hive:
     jdbc-url: jdbc:hive2://localhost:10000/default
-    username: hive
-    password: ""
+    username: root
+    password: "123456"
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml

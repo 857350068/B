@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/admin/**").hasRole("HR_ADMIN")
                 .antMatchers("/api/warning/**").hasAnyRole("HR_ADMIN", "DEPT_HEAD")
+                .antMatchers("/api/analysis/**").hasAnyRole("HR_ADMIN", "DEPT_HEAD", "MANAGEMENT")
                 .antMatchers("/api/**").hasAnyRole("HR_ADMIN", "DEPT_HEAD", "MANAGEMENT", "EMPLOYEE")
                 .anyRequest().authenticated()
                 .and()

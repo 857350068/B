@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hr.mapper.DataAnalysisMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.hr.model.entity.DataAnalysis">
+        <id column="id" property="id"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="analysis_name" property="analysisName"/>
+        <result column="description" property="description"/>
+        <result column="analysis_type" property="analysisType"/>
+        <result column="query_statement" property="queryStatement"/>
+        <result column="parameters" property="parameters"/>
+        <result column="result_mapping" property="resultMapping"/>
+        <result column="chart_config" property="chartConfig"/>
+        <result column="data_source" property="dataSource"/>
+        <result column="execution_frequency" property="executionFrequency"/>
+        <result column="last_execution_time" property="lastExecutionTime"/>
+        <result column="next_execution_time" property="nextExecutionTime"/>
+        <result column="status" property="status"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="version" property="version"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, category_id, analysis_name, description, analysis_type, query_statement,
+        parameters, result_mapping, chart_config, data_source, execution_frequency,
+        last_execution_time, next_execution_time, status, created_by, create_time, 
+        update_time, version, deleted
+    </sql>
+
+    <!-- 分页查询数据分析任务 -->
+    <select id="selectAnalysisPage" resultMap="BaseResultMap">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM data_analysis
+        <where>
+            deleted = 0
+            <if test="query.categoryId != null">
+                AND category_id = #{query.categoryId}
+            </if>
+            <if test="query.analysisName != null and query.analysisName != ''">
+                AND analysis_name LIKE CONCAT('%', #{query.analysisName}, '%')
+            </if>
+            <if test="query.analysisType != null and query.analysisType != ''">
+                AND analysis_type = #{query.analysisType}
+            </if>
+            <if test="query.dataSource != null and query.dataSource != ''">
+                AND data_source = #{query.dataSource}
+            </if>
+            <if test="query.status != null and query.status != ''">
+                AND status = #{query.status}
+            </if>
+            <if test="query.createdBy != null">
+                AND created_by = #{query.createdBy}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据分类ID查询分析任务数量 -->
+    <select id="countByCategoryId" resultType="java.lang.Integer">
+        SELECT COUNT(*) 
+        FROM data_analysis 
+        WHERE category_id = #{categoryId} AND deleted = 0
+    </select>
+
+    <!-- 查询需要执行的分析任务 -->
+    <select id="selectExecutableAnalysis" resultType="com.hr.model.entity.DataAnalysis">
+        SELECT 
+        <include refid="Base_Column_List"/>
+        FROM data_analysis
+        WHERE deleted = 0 
+        AND status = 'ACTIVE'
+        AND (next_execution_time IS NULL OR next_execution_time &lt;= #{currentTime})
+        ORDER BY next_execution_time ASC
+    </select>
+
+</mapper>

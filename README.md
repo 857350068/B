@@ -1,9 +1,59 @@
 # 人力资源数据中心系统
 
-> 依据 doc/ 目录下技术文档完整开发
-> SpringBoot 2.7.17 + MyBatis + Vue 3 + Element Plus
+## 项目概述
 
-## 快速开始
+本项目是一个功能完整的人力资源数据中心系统，采用前后端分离架构，旨在为企业提供人力资源数据的采集、分析、可视化展示和管理功能。系统涵盖从数据图表展示到后台管理的全方位功能模块。
+
+## 技术架构
+
+### 后端技术栈
+- **框架**: Spring Boot 2.7.17
+- **持久层**: MyBatis-Plus 3.5.3.1 + MySQL 8.0
+- **安全**: Spring Security + JWT Token认证
+- **工具**: Lombok、Hutool、MyBatis-Plus Generator
+- **构建工具**: Maven
+
+### 前端技术栈
+- **框架**: Vue 3 + TypeScript
+- **UI组件**: Element Plus
+- **状态管理**: Pinia
+- **路由管理**: Vue Router
+- **数据可视化**: ECharts
+- **HTTP客户端**: Axios
+
+## 功能模块
+
+### 1. 数据图表模块
+- 提供多种数据可视化图表（柱状图、折线图、饼图等）
+- 支持按部门、时间维度进行数据筛选
+- 实时数据展示和图表交互功能
+
+### 2. 收藏管理模块
+- 支持收藏重要数据图表和报表
+- 提供个人收藏夹管理功能
+- 快捷访问常用数据视图
+
+### 3. 用户管理模块
+- 用户增删改查功能
+- 角色权限管理（管理员、部门负责人、普通用户）
+- 用户状态管理
+
+### 4. 数据管理模块
+- 数据同步到Hive功能
+- Excel数据导入导出
+- 数据质量检查和验证
+
+### 5. 规则管理模块
+- 预警规则配置
+- 规则启用/禁用管理
+- 规则执行日志查看
+
+### 6. 报表管理模块
+- 报表模板管理
+- 自定义报表生成
+- 报表数据导出功能
+
+## 环境要求
 
 ### 1. 环境要求
 
@@ -15,89 +65,115 @@
 ### 2. 数据库初始化
 
 ```sql
--- 创建数据库和用户
-CREATE DATABASE hr_db DEFAULT CHARACTER SET utf8mb4;
-CREATE USER 'hr_user'@'%' IDENTIFIED BY 'hr_password';
-GRANT ALL ON hr_db.* TO 'hr_user'@'%';
-FLUSH PRIVILEGES;
-
--- 执行 backend/src/main/resources/init.sql
+-- 创建数据库
+CREATE DATABASE IF NOT EXISTS hr_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE hr_db;
-SOURCE backend/src/main/resources/init.sql;
+
+-- 执行初始化脚本
+source backend/src/main/resources/init.sql;
 ```
 
-### 3. 启动后端
+### 3. 配置文件修改
+
+修改 `backend/src/main/resources/application.yml` 中的数据库连接信息：
+
+```yaml
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/hr_db?characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&rewriteBatchedStatements=true
+    username: your_username  # 替换为实际用户名
+    password: your_password  # 替换为实际密码
+```
+
+修改 `frontend/hr-frontend/src/config/api.ts` 中的API基础URL（如后端端口不是8080）：
+
+```typescript
+export const BASE_URL = 'http://localhost:8081'; // 根据实际后端端口调整
+```
+
+## 快速启动
+
+### 方法一：使用一键启动脚本（推荐）
+
+双击运行 `start_system.bat` 文件，系统将自动启动后端和前端服务。
+
+### 方法二：手动启动
+
+#### 1. 启动后端服务
 
 ```bash
 cd backend
-mvn spring-boot:run
+mvn spring-boot:run -Dserver.port=8081
 ```
 
-服务启动后：
-- 端口：8080
-- 管理员账号：admin / 123456（首次启动自动创建）
-- 登录接口：POST http://localhost:8080/api/auth/login
-
-### 4. 验证接口
-
-**Windows PowerShell（必须用 curl.exe，JSON 用双引号+转义）：**
-
-```powershell
-# 登录（PowerShell 中 -d 用双引号包裹，内部 \" 转义）
-curl.exe -X POST http://localhost:8080/api/auth/login -H "Content-Type: application/json" -d "{\"username\":\"admin\",\"password\":\"123456\"}"
-
-# 获取分类（需携带返回的 token）
-curl.exe http://localhost:8080/api/category/tree -H "Authorization: Bearer <你的token>"
-
-# 获取预警
-curl.exe http://localhost:8080/api/warning -H "Authorization: Bearer <你的token>"
-```
-
-**Linux / Git Bash：**
+#### 2. 启动前端服务
 
 ```bash
-curl -X POST http://localhost:8080/api/auth/login -H "Content-Type: application/json" -d '{"username":"admin","password":"123456"}'
+cd frontend/hr-frontend
+npm install
+npm run dev
 ```
 
-**推荐**：用 Postman 发送 POST，Body 选 raw + JSON，内容：`{"username":"admin","password":"123456"}`
+## 访问系统
 
-或直接运行：`powershell -ExecutionPolicy Bypass -File scripts/test-login.ps1`
+- 前端应用：http://localhost:5173
+- 后端API：http://localhost:8081
 
-## 数据说明
+## 默认账户
 
-### MySQL 数据（init.sql）
-- 用户：admin（自动创建）、1001/1002（部门负责人）、2001（管理层）、3001/3002（员工），密码均为 123456
-- 部门：101 销售部、102 研发部、103 人事部、104 财务部
-- 8 大分类、预警规则、员工档案（含 2024-2026 历史数据）、操作日志
+| 用户名 | 密码 | 角色 | 部门 |
+|--------|------|------|------|
+| admin | 123456 | HR_ADMIN | - |
+| 1001 | 123456 | DEPT_HEAD | 销售部 |
+| 1002 | 123456 | DEPT_HEAD | 研发部 |
+| 2001 | 123456 | MANAGEMENT | - |
+| 3001 | 123456 | EMPLOYEE | 销售部 |
+| 3002 | 123456 | EMPLOYEE | 研发部 |
 
-### Hive 海量数据
-- `hive/hr_analytic_data.sql`：建表
-- `hive/insert_analytic_data.sql`：INSERT SELECT 生成约 5 万条（4 部门 × 8 分类 × 5 年月度）
-- `hive/insert_analytic_data_values.sql`：VALUES 方式约 30 条（备用）
-- `scripts/generate_hive_data.py`：生成 CSV，可配合 `load_analytic_data.sql` 批量导入
+## 部署指南
 
-```bash
-# 生成 5 万行 CSV
-python scripts/generate_hive_data.py 50000
-```
+详细部署指南请参阅 `deployment_guide.md` 文件。
+
+## 项目总结
+
+完整的项目总结请参阅 `project_summary.md` 文件。
 
 ## 项目结构
 
 ```
-D:\B\
-├── backend/           # SpringBoot 后端
-├── frontend/          # Vue 3 前端（待开发）
-├── doc/               # 技术文档
-├── scripts/           # 数据生成脚本
-└── deploy/            # 部署脚本（待补充）
+d:\B\
+├── backend/                 # 后端Spring Boot项目
+│   ├── src/main/java/com/hr/
+│   │   ├── common/         # 通用类
+│   │   ├── config/         # 配置类
+│   │   ├── controller/     # 控制器
+│   │   ├── exception/      # 异常处理
+│   │   ├── mapper/         # 数据访问层
+│   │   ├── model/          # 数据模型
+│   │   ├── security/       # 安全相关
+│   │   ├── service/        # 业务逻辑层
+│   │   └── util/           # 工具类
+│   ├── src/main/resources/
+│   │   ├── mapper/         # MyBatis映射文件
+│   │   ├── application.yml # 配置文件
+│   │   └── init.sql        # 数据库初始化脚本
+│   └── pom.xml             # Maven依赖配置
+├── frontend/hr-frontend/   # 前端Vue项目
+│   ├── src/
+│   │   ├── api/            # API接口定义
+│   │   ├── components/     # 通用组件
+│   │   ├── views/          # 页面组件
+│   │   ├── router/         # 路由配置
+│   │   ├── stores/         # Pinia状态管理
+│   │   └── utils/          # 工具函数
+│   └── package.json        # NPM依赖配置
+├── doc/                    # 文档
+├── scripts/                # 脚本文件
+├── deployment_guide.md     # 部署指南
+├── project_summary.md      # 项目总结
+├── start_backend.bat       # 后端启动脚本
+├── start_frontend.bat      # 前端启动脚本
+├── start_system.bat        # 一键启动脚本
+└── README.md               # 项目说明
 ```
-
-## 开发进度
-
-- [x] 阶段0：环境与基础
-- [x] 阶段1：用户认证（登录、JWT、RBAC）
-- [x] 阶段2：数据分类、看板
-- [x] 阶段3：预警信息
-- [ ] 阶段4-9：进行中
-
-详见 `doc/完整开发计划.md`

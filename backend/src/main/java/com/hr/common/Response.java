@@ -1,12 +1,9 @@
 package com.hr.common;
 
-import lombok.Data;
-
 /**
  * 统一响应格式
  * 依据：后端开发设计文档 - 所有接口返回 { code, msg, data }
  */
-@Data
 public class Response<T> {
 
     private int code;
@@ -31,5 +28,29 @@ public class Response<T> {
         r.setMsg(msg);
         r.setData(null);
         return r;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
     }
 }

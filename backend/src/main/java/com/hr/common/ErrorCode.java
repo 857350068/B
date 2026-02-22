@@ -12,4 +12,9 @@ public class ErrorCode {
     public static final int FORBIDDEN = 403;
     public static final int NOT_FOUND = 404;
     public static final int SERVER_ERROR = 500;
+    
+    // 扩展错误码
+    public static final int PARAMS_ERROR = 400;
+    public static final int OPERATION_ERROR = 500;
+    public static final int NO_AUTH_ERROR = 403;
 }

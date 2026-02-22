@@ -7,6 +7,8 @@
         <result column="name" property="name"/>
         <result column="parent_id" property="parentId"/>
         <result column="sort_order" property="sortOrder"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <select id="selectAll" resultMap="BaseResultMap">

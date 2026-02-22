@@ -15,9 +15,14 @@ CREATE TABLE IF NOT EXISTS sys_user (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL UNIQUE COMMENT '工号',
     password VARCHAR(100) NOT NULL COMMENT 'BCrypt加密密码',
+    name VARCHAR(50) NOT NULL COMMENT '姓名',
     role VARCHAR(20) NOT NULL COMMENT 'HR_ADMIN/DEPT_HEAD/MANAGEMENT/EMPLOYEE',
     dept_id BIGINT DEFAULT NULL COMMENT '所属部门ID',
+    dept_name VARCHAR(50) COMMENT '部门名称',
     dept_scope TEXT COMMENT '部门范围JSON数组 [101,102,103]',
+    phone VARCHAR(20) COMMENT '手机号',
+    email VARCHAR(100) COMMENT '邮箱',
+    status TINYINT DEFAULT 1 COMMENT '状态 0=禁用 1=启用',
     is_deleted TINYINT DEFAULT 0 COMMENT '0=正常 1=已删除',
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -87,7 +92,25 @@ CREATE TABLE IF NOT EXISTS sys_favorite (
     create_time DATETIME DEFAULT CURRENT_TIMESTAMP
 ) COMMENT '收藏';
 
--- 8. 初始化 8 大数据分类 (项目功能设计 2.1)
+-- 8. 报表模板表 (报表管理功能)
+CREATE TABLE IF NOT EXISTS report_template (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL COMMENT '模板名称',
+    description VARCHAR(500) COMMENT '模板描述',
+    category VARCHAR(50) COMMENT '模板分类',
+    content TEXT COMMENT '模板内容(JSON格式)',
+    query_sql TEXT COMMENT '查询语句',
+    parameters TEXT COMMENT '参数配置(JSON格式)',
+    chart_config TEXT COMMENT '图表配置(JSON格式)',
+    enabled TINYINT DEFAULT 1 COMMENT '是否启用 0=否 1=是',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    created_by BIGINT COMMENT '创建人ID',
+    updated_by BIGINT COMMENT '更新人ID',
+    version INT DEFAULT 1 COMMENT '版本号'
+) COMMENT '报表模板';
+
+-- 9. 初始化 8 大数据分类 (项目功能设计 2.1)
 INSERT INTO hr_data_category (id, name, parent_id, sort_order) VALUES
 (1, '组织效能分析', 0, 1),
 (2, '人才梯队建设', 0, 2),
@@ -98,20 +121,20 @@ INSERT INTO hr_data_category (id, name, parent_id, sort_order) VALUES
 (7, '人力成本优化', 0, 7),
 (8, '人才发展预测', 0, 8);
 
--- 9. 初始化部门
+-- 10. 初始化部门
 INSERT INTO hr_department (id, name, parent_id, sort_order) VALUES
 (101, '销售部', 0, 1),
 (102, '研发部', 0, 2),
 (103, '人事部', 0, 3),
 (104, '财务部', 0, 4);
 
--- 10. 初始化预警规则 (开题报告 3.2.2)
+-- 11. 初始化预警规则 (开题报告 3.2.2)
 INSERT INTO warning_rule (rule_type, threshold, description, effective) VALUES
 ('FLIGHT_RISK', 8.0, '员工流失率超过8%触发预警', 1),
 ('TALENT_SHORTAGE', 3, '关键岗位空缺超过3人触发预警', 1),
 ('COST_OVER', 15.0, '人力成本环比增长超过15%触发预警', 1);
 
--- 11. 测试用户 (密码均为 123456，BCrypt加密)
+-- 12. 测试用户 (密码均为 123456，BCrypt加密)
 -- admin 由 DataInitializer 创建，此处补充其他角色
 INSERT IGNORE INTO sys_user (username, password, role, dept_id, dept_scope, is_deleted) VALUES
 ('1001', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'DEPT_HEAD', 101, '[101]', 0),
@@ -120,7 +143,7 @@ INSERT IGNORE INTO sys_user (username, password, role, dept_id, dept_scope, is_d
 ('3001', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'EMPLOYEE', 101, NULL, 0),
 ('3002', '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG', 'EMPLOYEE', 102, NULL, 0);
 
--- 12. 员工档案数据 (数据同步到 Hive 的来源，覆盖 8 大分类、4 部门)
+-- 13. 员工档案数据 (数据同步到 Hive 的来源，覆盖 8 大分类、4 部门)
 -- 岗位：销售经理/销售员/研发工程师/产品经理/HR专员/财务等
 INSERT INTO employee_profile (employee_no, name, dept_id, job, category_id, value, period, is_deleted) VALUES
 ('E1001','张伟',101,'销售经理',1,85.2,'202601',0),('E1002','李芳',101,'销售员',1,82.1,'202601',0),('E1003','王强',101,'销售员',2,78.5,'202601',0),
@@ -145,7 +168,13 @@ INSERT INTO employee_profile (employee_no, name, dept_id, job, category_id, valu
 ('E1001','张伟',101,'销售经理',1,82.0,'202401',0),('E1002','李芳',101,'销售员',1,78.5,'202401',0),('E2001','郑浩',102,'研发工程师',1,85.0,'202401',0),
 ('E1001','张伟',101,'销售经理',1,83.2,'202406',0),('E2001','郑浩',102,'研发工程师',1,86.5,'202406',0),('E1001','张伟',101,'销售经理',1,84.0,'202412',0);
 
--- 13. 操作日志示例
+-- 14. 操作日志示例
 INSERT INTO sys_log (user_id, username, operation, method, params, ip) VALUES
 (1, 'admin', '用户登录', 'POST /api/auth/login', '{}', '127.0.0.1'),
 (1, 'admin', '数据同步', 'POST /admin/data/sync', '{}', '127.0.0.1');
+
+-- 15. 报表模板示例数据
+INSERT INTO report_template (id, name, description, category, content, query_sql, parameters, chart_config, enabled, created_by, updated_by) VALUES
+(1, '月度人员报表', '月度人员变动情况统计', 'PERSONNEL', '{"type":"table","columns":["employee_no","name","dept_name","job","status"]}', 'SELECT employee_no, name, dept_name, job, status FROM employee_profile WHERE period = ? AND is_deleted = 0', '{"period":"YYYYMM"}', '{"type":"column","title":"月度人员统计"}', 1, 1, 1),
+(2, '季度绩效报表', '季度员工绩效评估汇总', 'PERFORMANCE', '{"type":"chart","chartType":"bar","metrics":["performance_score"]}', 'SELECT dept_name, AVG(value) as avg_score FROM employee_profile WHERE category_id = 4 AND period >= ? GROUP BY dept_name', '{"quarter":"YYYYQ"}', '{"type":"bar","title":"部门绩效对比"}', 1, 1, 1),
+(3, '年度薪酬报表', '年度薪酬福利支出统计', 'COMPENSATION', '{"type":"chart","chartType":"pie","metrics":["salary_cost"]}', 'SELECT dept_name, SUM(value) as total_cost FROM employee_profile WHERE category_id = 3 AND period LIKE ? GROUP BY dept_name', '{"year":"YYYY"}', '{"type":"pie","title":"各部门薪酬占比"}', 0, 1, 1);
